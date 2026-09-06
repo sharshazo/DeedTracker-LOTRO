@@ -1,3 +1,4 @@
+
 -- Chat log filter.
 -- Controls chat messages and actions the appropriate functions based on the message.
 chatComplete = GetString(_LANG.DEEDS.CHAT_COMPLETED);
@@ -6,27 +7,9 @@ taskIndicator = GetString(_LANG.DEEDS.TASK_INDICATOR);
 function InitiateChatLogger()
     local character = MYCHAR:GetName();
 
-    -- QUESTSYNC INTEGRATION: Use shared global hook
-    if not _G.LQA_ChatHookWatcher then
-        _G.LQA_ChatHookWatcher = Turbine.UI.Control()
-        _G.LQA_ChatHookWatcher:SetWantsUpdates(true)
-        _G.LQA_ChatHookWatcher.Update = function(sender, args)
-        end
+    CHATLOG = Turbine.Chat;
+    CHATLOG.Received = function (sender, args)
 
-        _G.LQA_ChatListeners = _G.LQA_ChatListeners or {}
-        
-        if not _G.LQA_ChatHookInstalled then
-            Turbine.Chat.Received = function(sender, args)
-                for _, listener in pairs(_G.LQA_ChatListeners) do
-                    pcall(listener, sender, args)
-                end
-            end
-            _G.LQA_ChatHookInstalled = true
-        end
-    end
-
-    _G.LQA_ChatListeners = _G.LQA_ChatListeners or {}
-    _G.LQA_ChatListeners["DeedTracker"] = function(sender, args)
         local tempMessage = tostring(args.Message);
 
         if args.ChatType == Turbine.ChatType.Standard then
@@ -50,6 +33,7 @@ function InitiateChatLogger()
             PREVIOUS_QUEST_CHAT = tempMessage;
             DataFiles.CheckForDelayedText(tempMessage);
         end
+
     end
 end
 
@@ -64,7 +48,10 @@ function ChangeLocation(newLocation)
                 local instanceName = _LANG.LEAVE_CHANNEL.LAST_KNOWN_INSTANCE_ENTERED_NAME;
                 if (instanceName ~= "") then
                     instance = " (" .. instanceName .. ")";
+
+                    -- Reset the delayed skirmish completion text, if any:
                     Debug("Entering an instance, resetting delayed skirmish completion status.");
+
                     DELAYED_SKIRMISH_COMPLETION_CHAT = nil;
                 end
             end
@@ -75,24 +62,31 @@ end
 
 -- Filters here for use with the Quest channel.
 function FilterQuest(character, cMessage)
+
+    -- Check if the message contains "Task: ". If so, it's a task quest and we can skip further processing.
+    -- Todo: Is this meaningful in German or French? Find out!
+    --      Also: Does it actually save any time?
+    --      If this is useful, should we just have a list of Task quests?
     if (taskIndicator ~= nil and string.find(cMessage, taskIndicator)) then
         return;
     end
 
+    -- Check if message contains "Completed:" for the current language.
     if (string.find(cMessage, chatComplete)) then
         local deedName = string.gsub(cMessage, chatComplete, "");
+        -- Remove any additional newline characters:
         deedName = string.gsub(deedName,"\n","");
-        deedName = string.gsub(deedName,"^%s*(.-)%s*$", "%1");
         IfDeedMarkComplete(character, deedName);
     end
-    
-    DataFiles.CheckForObjectiveText(character, cMessage);
+    -- Otherwise, check if we see instance-start text:
     FindInstanceStartText(cMessage);
 end
 
 function FindInstanceStartText(cMessage)
+    -- If this is an instance, it starts with "<u>[name]</u>\n"
     local enterPattern = "<u>([%a%p%u%l%s]*)</u>";   
     local possibleInstance = string.match(cMessage, enterPattern);
     if (possibleInstance == nil or possibleInstance == "") then return; end
+
     _LANG.LEAVE_CHANNEL.LAST_KNOWN_INSTANCE_ENTERED_NAME = possibleInstance;
 end

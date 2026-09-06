@@ -956,50 +956,6 @@ function GetDeedObjectiveControl(objective, width)
     return deedObjectiveControl;
 end
 
-
--- INYECTADO: MoorMap integration
-function LQA_ParseCoord(coordStr)
-    if not coordStr then return 0 end
-    local val = tonumber(string.sub(coordStr, 1, -2)) or 0
-    local dir = string.sub(coordStr, -1)
-    if dir == "S" or dir == "W" then
-        val = -val
-    end
-    return string.gsub(tostring(val), ",", ".")
-end
-
-function MakeMoorMapControl(parent, point, x, y, name, desc, regionName)
-    if not regionName then regionName = "Eriador" end
-    if not name or name == "" then name = "Objetivo" end
-    if not desc or desc == "" then desc = "Proeza" end
-    name = string.gsub(name, ":", "")
-    desc = string.gsub(desc, ":", "")
-    
-    local ns = LQA_ParseCoord(point.LAT)
-    local ew = LQA_ParseCoord(point.LONG)
-    
-    local moormapCommand = "/MoorMap ping_r " .. tostring(regionName) .. ":" .. ns .. ":" .. ew .. ":" .. tostring(name) .. ":" .. tostring(desc)
-    
-    local quickslotButton = Turbine.UI.Button()
-    quickslotButton:SetParent(parent)
-    quickslotButton:SetSize(16, 15)
-    quickslotButton:SetPosition(x, y)
-    
-    local quickslot = Turbine.UI.Lotro.Quickslot()
-    quickslot:SetParent(quickslotButton)
-    quickslot:SetShortcut(Turbine.UI.Lotro.Shortcut(Turbine.UI.Lotro.ShortcutType.Alias, moormapCommand))
-    quickslot:SetAllowDrop(false)
-
-    -- Para distinguirlo del boton Waypoint, le ponemos el icono de MoorMap (brillo tenue)
-    quickslot.hider = Turbine.UI.Control()
-    quickslot.hider:SetParent(quickslotButton)
-    quickslot.hider:SetMouseVisible(false)
-    quickslot.hider:SetBackground(_IMAGES.WAYPOINT_ARROW)
-    quickslot.hider:SetBackColor(Turbine.UI.Color(0, 1, 0)) -- Tinte verde para MoorMap
-    quickslot.hider:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend)
-
-    return quickslotButton
-end
 function MakeWaypointControl(parent, point, x, y)
     local waypointCommand = "";
     local latLong = point.LAT .. ", " .. point.LONG;
@@ -1026,7 +982,7 @@ function MakeWaypointControl(parent, point, x, y)
     return quickslotButton;
 end
 
-function GetDeedGeoObjectiveControl(location, width, deedName, regionName)
+function GetDeedGeoObjectiveControl(location, width)
     local deedGeoObjectiveControl = Turbine.UI.Control();
     deedGeoObjectiveControl:SetWidth(width);
     deedGeoObjectiveControl:SetMouseVisible(false);
@@ -1045,7 +1001,6 @@ function GetDeedGeoObjectiveControl(location, width, deedName, regionName)
     if (WAYPOINT_AVAILABLE) then
         if (pointCount == 1 and SETTINGS.OBJECTIVES_SHOW_COORDINATES) then
             local quickslotButton = MakeWaypointControl(deedGeoObjectiveControl, location.POINTS[1], 5, y);
-            local moormapBtn = MakeMoorMapControl(deedGeoObjectiveControl, location.POINTS[1], 25, y, objectiveOrNameText, deedName, regionName)
             objectiveOrNameText = objectiveOrNameText .. " (" .. quickslotButton.latLong .. ")";
         end
     end
@@ -1056,31 +1011,34 @@ function GetDeedGeoObjectiveControl(location, width, deedName, regionName)
         objectiveOrName:SetFont(font);
         objectiveOrName:SetForeColor(Turbine.UI.Color.Yellow);
         objectiveOrName:SetText(objectiveOrNameText);
-        
-        -- Measure text
-        local tempLabel = Turbine.UI.Label();
-        tempLabel:SetFont(font);
-        tempLabel:SetText(objectiveOrNameText);
-        tempLabel:SetSize(width - 50, 20);
-        AutoFitLabelHeight(tempLabel, 200);
-        local labelHeight = tempLabel:GetHeight();
-        objectiveOrName:SetSize(width - 50, labelHeight);
-        
-        if (pointCount == 1 and SETTINGS.OBJECTIVES_SHOW_COORDINATES) then
-            objectiveOrName:SetPosition(50, y);
-        else
-            objectiveOrName:SetPosition(0, y);
-        end
-        if (debugColors) then objectiveOrName:SetBackColor(Turbine.UI.Color.Red); end
-        y = y + labelHeight + 5;
+        objectiveOrName:SetSize(width - 50, 20);
+        AutoFitLabelHeight(objectiveOrName, 200);
+        objectiveOrName:SetPosition(25, y);
+        if (debugColors) then objectiveOrName:SetBackColor(Turbine.UI.Color.Blue); end
+        objectiveOrName:SetMouseVisible(false);
+        y = y + objectiveOrName:GetHeight();
     end
-    
-    if (pointCount > 1 and SETTINGS.OBJECTIVES_SHOW_COORDINATES) then
+
+    local loreText = location.LORE;
+    if (loreText) then
+        local lore = Turbine.UI.Label();
+        lore:SetParent(deedGeoObjectiveControl);
+        lore:SetFont(Turbine.UI.Lotro.Font.Verdana12);
+        lore:SetText(loreText);
+        lore:SetSize(width - 75, 20);
+        AutoFitLabelHeight(lore, 1000);
+        lore:SetPosition(50, y);
+        if (debugColors) then lore:SetBackColor(Turbine.UI.Color.Blue); end
+        lore:SetMouseVisible(false);
+        y = y + lore:GetHeight();
+    end
+
+    if (pointCount > 1) then
+        -- add a label for each point:
         for i=1, pointCount do
             local point = location.POINTS[i];
 
             local quickslotButton = MakeWaypointControl(deedGeoObjectiveControl, point, 5, y);
-            local moormapBtn = MakeMoorMapControl(deedGeoObjectiveControl, point, 25, y, objectiveOrNameText, deedName, regionName)
 
             local pointLabel = Turbine.UI.Label();
             pointLabel:SetParent(deedGeoObjectiveControl);
@@ -1091,11 +1049,12 @@ function GetDeedGeoObjectiveControl(location, width, deedName, regionName)
             AutoFitLabelHeight(pointLabel, 200);
             pointLabel:SetPosition(50, y);
             if (debugColors) then pointLabel:SetBackColor(Turbine.UI.Color.Blue); end
-
-            y = y + pointLabel:GetHeight() + 5;
+            pointLabel:SetMouseVisible(false);
+            y = y + pointLabel:GetHeight();
         end
     end
 
+    y = y + 5;
     deedGeoObjectiveControl:SetHeight(y);
     return deedGeoObjectiveControl;
 end
@@ -1190,7 +1149,7 @@ function GetDeedInformationControl(deed, width, includeObjectives)
                     if (objectives[i] ~= nil) then
                         -- if it has geo stuff, make a geo control:
                         if (objectives[i].POINTS ~= nil) then
-                            local deedGeoObjectiveControl = GetDeedGeoObjectiveControl(objectives[i], width, deedName);
+                            local deedGeoObjectiveControl = GetDeedGeoObjectiveControl(objectives[i], width);
                             if (deedGeoObjectiveControl ~= nil) then
                                 deedGeoObjectiveControl:SetParent(deedControl);
                                 deedGeoObjectiveControl:SetPosition(0, y);
@@ -1218,4 +1177,3 @@ end
 function ShowPluginOptions()
     Turbine.PluginManager.ShowOptions(Plugins["Deed Tracker"]);
 end
-
