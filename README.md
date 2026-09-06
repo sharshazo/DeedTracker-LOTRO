@@ -18,49 +18,36 @@ descripciones, objetivos y categorías de cada hazaña).
 - Permite importar/compartir el progreso entre distintos personajes de
   tu misma cuenta.
 
-## Instalación — ⚠️ leer con atención, esta es la parte que confunde
+## Instalación (un solo zip, ya armado)
 
-A diferencia de la mayoría de los addons, **el archivo `.plugin` y la
-carpeta de código NO van al mismo nivel**. Tenés que armar esta
-estructura exacta dentro de tu carpeta de Plugins:
-
-```
-Documentos\The Lord of the Rings Online\Plugins\
-└── CubePlugins\                  ← 1. creás esta carpeta nueva
-    ├── DeedTracker.plugin        ← 2. este archivo SUELTO, al lado de la carpeta
-    └── DeedTracker\              ← 3. esta carpeta (con TODO el código adentro)
-        ├── Main.lua
-        ├── DataFiles\
-        └── ...
-```
-
-**Pasos:**
-
-1. Dentro de `Documentos\The Lord of the Rings Online\Plugins\`, creá
-   una carpeta nueva y renombrala a **`CubePlugins`** (si ya existe
-   porque tenés otro addon de Cube instalado, usá esa misma).
-2. Descargá este repositorio completo. Vas a tener una carpeta con
-   `Main.lua`, `DataFiles\`, `DeedTracker.plugin`, etc. — todo junto.
-3. Pegá **esa carpeta completa** dentro de `CubePlugins\`, y
-   **renombrala a `DeedTracker`** (el nombre tiene que ser exacto: el
-   addon lo tiene escrito a mano en su propio archivo `.plugin`).
-4. Ahora, sacá el archivo **`DeedTracker.plugin`** de adentro de esa
-   carpeta y **movelo un nivel para afuera**, para que quede suelto
-   directamente dentro de `CubePlugins\` (no adentro de `DeedTracker\`).
-
-Al final tiene que quedar exactamente como el dibujo de arriba: el
-archivo `.plugin` y la carpeta `DeedTracker\` **uno al lado del otro**,
-ambos dentro de `CubePlugins\`.
-
-5. Abrí LOTRO → **Opciones → Plugins** (o escribí `/pluginmanager` en
+1. Descargá el zip de la [**última versión (Releases)**](https://github.com/sharshazo/DeedTracker-LOTRO/releases/latest).
+2. Descomprimilo.
+3. Pegá la carpeta **`CubePlugins`** completa (viene con todo adentro
+   ya en su lugar) dentro de:
+   ```
+   Documentos\The Lord of the Rings Online\Plugins\
+   ```
+4. Abrí LOTRO → **Opciones → Plugins** (o escribí `/pluginmanager` en
    el chat) → tildá **"Deed Tracker"**.
 
-**Por qué es así:** el archivo `.plugin` de este addon dice
+Eso es todo — no hay que crear carpetas, renombrar nada, ni mover
+archivos por separado. El zip ya trae el archivo `.plugin` y la
+carpeta de código en el nivel exacto que el addon necesita.
+
+<details>
+<summary>¿Por qué el .plugin y el código van en niveles distintos? (para curiosos, o si descargás el código fuente en vez del zip)</summary>
+
+El archivo `.plugin` de este addon dice
 `<Package>CubePlugins.DeedTracker.Main</Package>` — esa ruta está
-escrita a mano por el autor original, así que los nombres de carpeta
-tienen que ser exactamente esos, ni un nivel más arriba ni más abajo.
-Si algo queda mal ubicado, el addon simplemente no va a aparecer en la
-lista de plugins del juego (no da error, solo no aparece).
+escrita a mano por el autor original: exige que `DeedTracker.plugin`
+esté **suelto** dentro de una carpeta `CubePlugins\`, y el código
+(`Main.lua`, `DataFiles\`, etc.) en una carpeta `DeedTracker\` **al
+lado** de ese archivo, no adentro de otra cosa. Si algo queda mal
+ubicado, el addon simplemente no va a aparecer en la lista de plugins
+del juego (no da error, solo no aparece). El zip de Releases ya viene
+armado así — este detalle solo importa si cloná el repositorio directo
+en vez de usar el zip.
+</details>
 
 ## Créditos
 
