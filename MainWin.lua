@@ -387,6 +387,7 @@ function DeedTrackerWin:DrawDeedTabs(sectionY)
         [8] = { x = left + 212; width = 100; section = self.cDeedTabsBottom }; -- Gondor
         [9] = { x = left + 312; width = 100; section = self.cDeedTabsBottom }; -- Mordor
        [10] = { x = left + 412; width = 100; section = self.cDeedTabsBottom }; -- Haradwaith
+       [11] = { x = left + 512; width = 100; section = self.cDeedTabsBottom }; -- Por zona (DeedsByZone.lua)
     }
 
     for i=1,#buttonLocations do
@@ -762,7 +763,9 @@ function DeedTrackerWin:MarkDeedCompleteFromChat(deed, nowStringOverride)
 
     -- Find the UI element and check it if it isn't already checked:
     local i = deed.i;
-    if (self.selectedCharacter == currentCharacter and self.selectedTab == i and deed["CHECK"] ~= nil) then
+    if (self.selectedCharacter == currentCharacter and deed["CHECK"] ~= nil and
+        deed["CHECK_PAGE"] == self.selectedTab and
+        (self.selectedTab == i or self.selectedTab == DataFiles.BY_ZONE)) then
         local checkbox = deed["CHECK"];
         checkbox.nowStringOverride = nowStringOverride;
         checkbox:SetChecked(not checkbox:IsChecked());
@@ -1360,6 +1363,9 @@ function DeedTrackerWin:RefreshDeedView(CHARACTER)
                 end
 
                 currentDeed["CHECK"] = chkCompleted;
+                -- pagina en la que se dibujo este checkbox (la misma hazaña puede
+                -- aparecer tambien en la pagina "Por zona")
+                currentDeed["CHECK_PAGE"] = self.selectedTab;
                 currentDeed["LABEL"] = lblDeedName;
 
                 self:UpdateTabProgress(

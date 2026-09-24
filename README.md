@@ -18,6 +18,23 @@ descripciones, objetivos y categorías de cada hazaña).
 - Permite importar/compartir el progreso entre distintos personajes de
   tu misma cuenta.
 
+## Novedades (2026-09-24): página "Por zona"
+
+Nueva pestaña de página **"Por zona"** (en inglés "By Zone"), al lado de
+las páginas de siempre. Tiene una pestaña por cada zona del juego (48) y
+en cada una junta todo lo de esa región en un solo lugar:
+
+- las hazañas de la zona (las mismas de la página de Regiones),
+- **== Instancias de la zona ==**: las hazañas de las mazmorras,
+  escaramuzas e incursiones que quedan en esa zona,
+- **== Reputación de la zona ==**: las hazañas de las facciones de esa
+  zona.
+
+Las páginas originales no cambian y los totales tampoco: es otra forma
+de ver las mismas hazañas. Marcar una hazaña como completa desde "Por
+zona" funciona igual que desde su página original. Detalle en
+`LEEME_POR_ZONA.txt`.
+
 ## Instalación (un solo zip, ya armado)
 
 1. Descargá el zip de la [**última versión (Releases)**](https://github.com/sharshazo/DeedTracker-LOTRO/releases/latest).

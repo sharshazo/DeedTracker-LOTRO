@@ -86,6 +86,8 @@ else
     import "CubePlugins.DeedTracker.DataFiles.DeedDataEN";
 end
 import "CubePlugins.DeedTracker.DataFiles.DeedInfo";
+-- Pagina extra "Por zona" (vista, no cambia nada de lo anterior):
+import "CubePlugins.DeedTracker.DataFiles.DeedsByZone";
 import "CubePlugins.DeedTracker.DataFiles.SessionPlayDeedIds";
 
 -- Windows --
